@@ -5,12 +5,14 @@ This repo contains the experiment code for the paper "Fenrir: Physics-Enhanced R
 
 ---
 
-__To solve differential equations in Julia with probabilistic numerical solvers, have a look at our package
-[ProbNumDiffEq.jl](https://github.com/nathanaelbosch/ProbNumDiffEq.jl).__
+__The functionality of this paper is available in [Fenrir.jl](https://github.com/nathanaelbosch/Fenrir.jl).__
+If you want to use the new PN marginal likelihood for an inference problem, we recommend to use Fenrir.jl and not this repo.
 
 ---
 
-A __Python__ implementation of probabilistic numerical ODE solvers, as well as many other probabilistic numerical methods, is maintained in __[ProbNum](https://github.com/probabilistic-numerics/probnum)__ (`pip install probnum`).
+__If you want to solve differential equations with probabilistic numerical solvers, have a look at [ProbNumDiffEq.jl](https://github.com/nathanaelbosch/ProbNumDiffEq.jl).__
+It contains _fast_ ODE filters for first- and second-order ODEs, and even DAEs.
+And if you prefer Python, just use one of the many solvers implemented in __[ProbNum](https://github.com/probabilistic-numerics/probnum)__ (`pip install probnum`).
 
 ---
 
