@@ -7,7 +7,6 @@ This repo contains the experiment code for the paper "Fenrir: Physics-Enhanced R
 
 __To solve differential equations in Julia with probabilistic numerical solvers, have a look at our package
 [ProbNumDiffEq.jl](https://github.com/nathanaelbosch/ProbNumDiffEq.jl).__
-Much of the new functionality presented in this paper is already available in ProbNumDiffEq.jl and will be covered in the documentation.
 
 ---
 
