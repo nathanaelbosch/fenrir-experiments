@@ -15,7 +15,7 @@ export lotkavolterra, fitzhughnagumo, protein_transduction
 include("other_problems.jl")
 export hodgkinhuxley, sird, seir, pendulum, logistic
 
-include("approximate_likelihood.jl")
-export approximate_nll, get_initial_diff
+include("exact_likelihood.jl")
+export exact_nll, get_initial_diff
 
 end
