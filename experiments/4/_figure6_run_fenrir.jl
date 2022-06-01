@@ -92,21 +92,21 @@ plot_callback()(x0, l, times, states)
 ############################################################################################
 # First optimize only the diffusion!
 ############################################################################################
-# diff_loss(x, other_params) = loss([x0[1:end-2]..., x...], other_params)
-# f = OptimizationFunction(diff_loss, GalacticOptim.AutoForwardDiff())
-# optprob = OptimizationProblem(f, [log(σ²0), log(κ²0)], opt_params;
-#                               lb=[log(1e-6), log(1e-20)], ub=[log(1e4), log(1e50)])
-# _cb = (x, l, args...) -> begin
-#     @info "Diffusion Opt CB" σ²=exp(x[1]) κ²=exp(x[2]) loss=l
-#     # push!(trajectory, (p=p0, diffusion=exp(x[1])))
-#     return false
-# end
-# optsol = solve(optprob, LBFGS(); maxiters=100, cb=_cb)
-# @info "Use these parameters to start the full optimization"
-# x0 = [x0[1:end-2]..., optsol.u...]
+diff_loss(x, other_params) = loss([x0[1:end-2]..., x...], other_params)
+f = OptimizationFunction(diff_loss, GalacticOptim.AutoForwardDiff())
+optprob = OptimizationProblem(f, [log(σ²0), log(κ²0)], opt_params;
+                              lb=[log(1e-6), log(1e-20)], ub=[log(1e4), log(1e50)])
+_cb = (x, l, args...) -> begin
+    @info "Diffusion Opt CB" σ²=exp(x[1]) κ²=exp(x[2]) loss=l
+    # push!(trajectory, (p=p0, diffusion=exp(x[1])))
+    return false
+end
+optsol = solve(optprob, LBFGS(); maxiters=100, cb=_cb)
+@info "Use these parameters to start the full optimization"
+x0 = [x0[1:end-2]..., optsol.u...]
 
-# l, times, states = loss(x0, opt_params);
-# plot_fenrir!(ax12, (t=times, u=states), (t=tsteps, u=noisy_ode_data))
+l, times, states = loss(x0, opt_params);
+plot_fenrir!(ax12, (t=times, u=states), (t=tsteps, u=noisy_ode_data))
 
 f = OptimizationFunction(loss, GalacticOptim.AutoForwardDiff())
 optprob = OptimizationProblem(
@@ -117,9 +117,11 @@ optprob = OptimizationProblem(
 optsol = solve(optprob,
                # LBFGS(linesearch=Optim.LineSearches.BackTracking());
                LBFGS();
-               maxiters=100, cb=plot_callback())
+               maxiters=100,
+               # cb=plot_callback()
+               )
 @info "DONE"
 
 l, times, states = loss(optsol.u, opt_params);
-# plot_fenrir!(ax13, (t=times, u=states), (t=tsteps, u=noisy_ode_data))
+plot_fenrir!(ax13, (t=times, u=states), (t=tsteps, u=noisy_ode_data))
 # push!(trajectories, (p0=p0, trajectory=copy(trajectory)))

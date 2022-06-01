@@ -1,9 +1,8 @@
-#=
-I think this script was meant to showcase that RK fails for high-frequency data
-=#
 using LinearAlgebra, Statistics, Random
 using ProbNumDiffEq, OrdinaryDiffEq, GalacticOptim, Optim, Flux, UnPack, DataFrames
 using Fenrir
+
+RESULTS_DIR = joinpath(@__DIR__, "results")
 
 prob, (tsteps, ode_data), noise_var, θ_init, θ_bounds, u0_bounds = pendulum()
 proj = [0 1]
@@ -12,9 +11,6 @@ true_sol = solve(prob, Tsit5(), abstol=1e-10, reltol=1e-10);
 D = length(prob.u0)
 RNG = MersenneTwister(1234)
 noisy_ode_data = [u + sqrt.(noise_var) .* randn(RNG, size(u)) for u in ode_data];
-
-# Plots.plot(true_sol, color=:black, linestyle=:dash, label="")
-# Plots.scatter!(tsteps, ProbNumDiffEq.stack(noisy_ode_data), color=(1:D)', label="")
 
 callback = function ()
     j = 0
@@ -94,4 +90,4 @@ end
 # hline!([1], color=:black, linestyle=:dash)
 # plot(p1, p2, layout=(2,1), legend=false)
 
-CSV.write("experiments/4/fenrir_df.csv", df)
+CSV.write(joinpath(RESULTS_DIR, "fenrir_df.csv"), df)

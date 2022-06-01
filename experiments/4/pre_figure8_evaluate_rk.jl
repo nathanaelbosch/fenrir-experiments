@@ -3,6 +3,8 @@ using ProbNumDiffEq, OrdinaryDiffEq, GalacticOptim, Optim, Plots, Flux
 using UnPack, CSV, DataFrames
 using Fenrir
 
+RESULTS_DIR = joinpath(@__DIR__, "results")
+
 prob, (tsteps, ode_data), noise_var, θ_init, θ_bounds, u0_bounds = pendulum()
 proj = [0 1]
 ode_data = [proj * u for u in ode_data]
@@ -84,4 +86,4 @@ p2 = scatter(df.p0, df.popt, xscale=:log10, yscale=:log10, xlabel="p0", ylabel="
 hline!([1], color=:black, linestyle=:dash)
 plot(p1, p2, layout=(2, 1), legend=false)
 
-CSV.write("experiments/4/rk_df.csv", df)
+CSV.write(joinpath(RESULTS_DIR, "rk_df.csv"), df)
