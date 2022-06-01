@@ -1,20 +1,17 @@
-using ProbNumDiffEq,
-    OrdinaryDiffEq, GalacticOptim, Optim, Plots, LinearAlgebra, Statistics
+using LinearAlgebra, Statistics
+using ProbNumDiffEq, OrdinaryDiffEq, GalacticOptim, Optim, Plots, UnPack
 using Fenrir
-using UnPack
 
-N = 100
+N_RUNS = 100
+
+RESULTS_DIR = joinpath(@__DIR__, "results")
+PROBLEMS = Dict("lv" => lotkavolterra, "fhn" => fitzhughnagumo)
+ALG = EK1
+DT_CHOICES = Dict("lv" => 5e-3, "fhn" => 5e-2)
+ORDER_CHOICES = Dict("lv" => 5, "fhn" => 3)
 
 for probname in ("lv", "fhn"), noisestr in ("low", "high")
     @info "STARTING THE EXPERIMENT:" probname noisestr
-
-    RESULTS_DIR = joinpath(@__DIR__, "results")
-
-    PROBLEMS = Dict("lv" => lotkavolterra, "fhn" => fitzhughnagumo)
-
-    ALG = EK1
-    DT_CHOICES = Dict("lv" => 5e-3, "fhn" => 5e-2)
-    ORDER_CHOICES = Dict("lv" => 5, "fhn" => 3)
 
     problem = PROBLEMS[probname]
 
@@ -28,11 +25,12 @@ for probname in ("lv", "fhn"), noisestr in ("low", "high")
     filepath = joinpath(RESULTS_DIR, filename)
     filename2 = "$(probname)_$(noisestr)noise_fenrir_withiv.txt"
     filepath2 = joinpath(RESULTS_DIR, filename2)
-    # @info "Remove previous results" filepath filepath2
-    # run(`rm -f $filepath`)
-    # run(`rm -f $filepath2`)
 
-    for i in 1:N
+    @info "Remove previous results" filepath filepath2
+    run(`rm -f $filepath`)
+    run(`rm -f $filepath2`)
+
+    for i in 1:N_RUNS
 
         # Generate the noisy data
         noisy_ode_data = [u + sqrt.(noise_var) .* randn(size(u)) for u in ode_data]
@@ -45,9 +43,7 @@ for probname in ("lv", "fhn"), noisestr in ("low", "high")
             noise=noise_var,
             dt=DT_CHOICES[probname],
             order=ORDER_CHOICES[probname],
-            tstops=probname == "pt" ?
-                   # union(0:5e-2:1, 1:0.1:2, 2:0.25:4, 4:0.5:10, 10:1:20, 20:2:100) : [],
-                   (10.0 .^ (-2.5:0.05:2)) : [],
+            tstops=[],
         )
 
         # Initial parameters, with both vector-field parameters and the log-diffusion
@@ -88,14 +84,8 @@ for probname in ("lv", "fhn"), noisestr in ("low", "high")
                 p = one(typeof(κ²)) .* p
                 @unpack prob, ode_data, tsteps, dt, tstops = other_params
                 data = (t=tsteps, u=noisy_ode_data)
-                return exact_nll(
-                    remake(prob, u0=u0, p=p),
-                    data,
-                    σ²,
-                    κ²;
-                    dt=dt,
-                    tstops=tstops,
-                )
+                _prob = remake(prob, u0=u0, p=p)
+                return exact_nll(data, σ², κ²; dt=dt, tstops=tstops)
             end
             function _cb1()
                 j = 0
