@@ -8,7 +8,7 @@ logistic_inverse(x) = @. log(x / (1 - x))
 
 RESULTS_DIR = joinpath(@__DIR__, "results")
 
-filename = "seir_fenrir.txt"
+filename = "seir_fenrir.csv"
 filepath = joinpath(RESULTS_DIR, filename)
 run(`rm -f $filepath`)
 @info "save into" filepath
