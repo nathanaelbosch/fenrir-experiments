@@ -15,7 +15,7 @@ run(`rm -f $filepath`)
 
 prob = seir()
 prob = ProbNumDiffEq.remake_prob_with_jac(prob)
-true_sol = solve(prob, Tsit5(), abstol = 1e-10, reltol = 1e-10)
+true_sol = solve(prob, Tsit5(), abstol=1e-10, reltol=1e-10)
 
 tsteps = 30.0:1.0:prob.tspan[2]
 ode_data = true_sol.(tsteps)
@@ -27,8 +27,7 @@ const D = length(prob.u0)
 const P = length(prob.p)
 const E = length(ode_data[1])
 
-
-for i = 1:100
+for i in 1:100
 
     # Generate the noisy data
     noisy_ode_data = [u + sqrt.(noise_var) .* randn(size(u)) for u in ode_data]
@@ -38,21 +37,13 @@ for i = 1:100
         i0 = x[2]
         u0 = [1.0 - e0 - i0, e0, i0, zero(i0)]
         p = x[3:5]
-        return (u0 = u0, p = p, σ² = exp(x[6]), κ² = exp(x[7]))
+        return (u0=u0, p=p, σ²=exp(x[6]), κ²=exp(x[7]))
     end
     function loss(x, other_params)
         @unpack u0, p, σ², κ² = vec_to_params(x)
         @unpack prob, ode_data, tsteps, proj, tstops = other_params
-        data = (t = tsteps, u = noisy_ode_data)
-        return exact_nll(
-            remake(prob, u0 = u0, p = p),
-            data,
-            σ²,
-            κ²,
-            ;
-            tstops = tstops,
-            proj = proj,
-        )
+        data = (t=tsteps, u=noisy_ode_data)
+        return exact_nll(remake(prob, u0=u0, p=p), data, σ², κ², ; tstops=tstops, proj=proj)
     end
     κ²0 = get_initial_diff(prob, noisy_ode_data, tsteps, proj)
     e0 = abs(1e-2 * randn())
@@ -61,12 +52,12 @@ for i = 1:100
     x0 = [e0, i0, p0..., log(1.0), log(κ²0)]
 
     opt_params = (
-        prob = prob,
-        ode_data = noisy_ode_data,
-        tsteps = tsteps,
+        prob=prob,
+        ode_data=noisy_ode_data,
+        tsteps=tsteps,
         # dt=0.2,
-        proj = proj,
-        tstops = 0:0.2:100,
+        proj=proj,
+        tstops=0:0.2:100,
     )
     loss(x0, opt_params)
 
@@ -82,14 +73,13 @@ for i = 1:100
     # optsol = solve(optprob, LBFGS(); maxiters=1000, cb=cb2)
     # x0 = [x0[1:end-2]..., optsol.u...]
 
-
     f = OptimizationFunction(loss, GalacticOptim.AutoForwardDiff())
     optprob = OptimizationProblem(
         f,
         x0,
         opt_params;
-        lb = [0.0, 0.0, 0.0, 0.0, 0.0, log(1e-6), log(1e-20)],
-        ub = [1.0, 1.0, 1.0, 1.0, 1.0, log(1e2), log(1e20)],
+        lb=[0.0, 0.0, 0.0, 0.0, 0.0, log(1e-6), log(1e-20)],
+        ub=[1.0, 1.0, 1.0, 1.0, 1.0, log(1e2), log(1e20)],
     )
 
     @info "[$i] Optimize"
@@ -104,9 +94,9 @@ for i = 1:100
     )
     optsol = solve(
         optprob,
-        LBFGS(linesearch = Optim.LineSearches.BackTracking());
-        maxiters = 1000,
-        cb = _cb(),
+        LBFGS(linesearch=Optim.LineSearches.BackTracking());
+        maxiters=1000,
+        cb=_cb(),
     )
 
     @unpack u0, p, σ², κ² = vec_to_params(optsol.u)

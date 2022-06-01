@@ -1,7 +1,6 @@
 using ProbNumDiffEq, OrdinaryDiffEq, GalacticOptim, Optim, LinearAlgebra, Statistics
 using Fenrir
 
-
 RESULTS_DIR = joinpath(@__DIR__, "results")
 
 PROBLEMS = (
@@ -9,14 +8,9 @@ PROBLEMS = (
     (fitzhughnagumo, "fhn"),
     # (protein_transduction, "pt"),
 )
-ALG = Dict(
-    "lv" => Tsit5,
-    "fhn" => RadauIIA5,
-    "pt" => Tsit5,
-)
+ALG = Dict("lv" => Tsit5, "fhn" => RadauIIA5)
 
 for (problem, probname) in PROBLEMS, noisestr in ("low", "high")
-
     Alg = ALG[probname]
 
     prob, (tsteps, ode_data), noise_levels, θ_init, θ_bounds, u0_bounds = problem()
@@ -46,7 +40,8 @@ for (problem, probname) in PROBLEMS, noisestr in ("low", "high")
                 remake(prob, u0=_u0, p=_p),
                 Alg(),
                 # abstol=1e-6, reltol=1e-3,
-                abstol=1e-8, reltol=1e-6,
+                abstol=1e-8,
+                reltol=1e-6,
                 saveat=tsteps,
             )
             if sol.retcode != :Success
@@ -68,17 +63,21 @@ for (problem, probname) in PROBLEMS, noisestr in ("low", "high")
 
         f = OptimizationFunction(loss, GalacticOptim.AutoForwardDiff())
         optprob = OptimizationProblem(
-            f, θ_start;
+            f,
+            θ_start;
             lb=[u0_bounds[1]..., θ_bounds[1]...],
             ub=[u0_bounds[2]..., θ_bounds[2]...],
         )
 
         @info "[$i] Optimize"
-        optimizer = LBFGS(linesearch=Optim.LineSearches.BackTracking());
-        cb() = (j=0; (p, l, args...)-> (j+=1; @info "[$i] Iter $j" l p; false))
-        optsol = solve(optprob, optimizer; maxiters=1000,
-                       # cb=cb()
-                       )
+        optimizer = LBFGS(linesearch=Optim.LineSearches.BackTracking())
+        cb() = (j = 0; (p, l, args...) -> (j += 1; @info "[$i] Iter $j" l p; false))
+        optsol = solve(
+            optprob,
+            optimizer;
+            maxiters=1000,
+            # cb=cb()
+        )
         opt_u0, opt_p = optsol.u[1:D], optsol.u[D+1:end]
         @info "[$i] Done" opt_u0 opt_p
 
@@ -86,7 +85,7 @@ for (problem, probname) in PROBLEMS, noisestr in ("low", "high")
             write(f, join(string.(opt_p), ",") * "\n")
         end
         open(filepath2, "a") do f
-            write(f, join(string.([opt_u0..., opt_p...,]), ",") * "\n")
+            write(f, join(string.([opt_u0..., opt_p...]), ",") * "\n")
         end
     end
 end

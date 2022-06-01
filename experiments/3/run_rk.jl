@@ -15,7 +15,7 @@ run(`rm -f $filepath`)
 
 prob = seir()
 prob = ProbNumDiffEq.remake_prob_with_jac(prob)
-true_sol = solve(prob, Tsit5(), abstol = 1e-10, reltol = 1e-10)
+true_sol = solve(prob, Tsit5(), abstol=1e-10, reltol=1e-10)
 
 tsteps = 30:1:prob.tspan[2]
 ode_data = true_sol.(tsteps)
@@ -27,9 +27,7 @@ const D = length(prob.u0)
 const P = length(prob.p)
 const E = length(ode_data[1])
 
-
-for i = 1:100
-
+for i in 1:100
     noisy_ode_data = [u + sqrt.(noise_var) .* randn(size(u)) for u in ode_data]
 
     function x_to_theta(x)
@@ -37,16 +35,16 @@ for i = 1:100
         i0 = x[2]
         u0 = [1.0 - e0 - i0, e0, i0, zero(i0)]
         p = x[3:5]
-        return (u0 = u0, p = p)
+        return (u0=u0, p=p)
     end
     function loss(x, _)
         @unpack u0, p = x_to_theta(x)
         sol = solve(
-            remake(prob, u0 = u0, p = p),
+            remake(prob, u0=u0, p=p),
             Tsit5(),
-            abstol = 1e-8,
-            reltol = 1e-6,
-            saveat = tsteps,
+            abstol=1e-8,
+            reltol=1e-6,
+            saveat=tsteps,
         )
 
         return sum(norm.([proj * u for u in sol.u] - noisy_ode_data) .^ 2), sol
@@ -64,15 +62,15 @@ for i = 1:100
     optprob = OptimizationProblem(
         f,
         x0;
-        lb = [0.0, 0.0, 0.0, 0.0, 0.0],
-        ub = [1.0, 1.0, 1.0, 1.0, 1.0],
+        lb=[0.0, 0.0, 0.0, 0.0, 0.0],
+        ub=[1.0, 1.0, 1.0, 1.0, 1.0],
     )
 
     @info "[$i] Optimize"
-    optimizer = LBFGS(linesearch = Optim.LineSearches.BackTracking())
+    optimizer = LBFGS(linesearch=Optim.LineSearches.BackTracking())
     # optimizer = LBFGS()
     # optimizer = BFGS(initial_stepnorm=0.01);
-    optsol = solve(optprob, optimizer; maxiters = 1000)
+    optsol = solve(optprob, optimizer; maxiters=1000)
     # i0, p = logistic(optsol.u[1]), logistic.(optsol.u[2:end])
     @unpack u0, p = x_to_theta(optsol.u)
     @info "[$i] Done" loss = optsol.minimum u0_inferred = u0 u0_true = prob.u0 p_inferred =

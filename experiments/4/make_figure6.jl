@@ -4,10 +4,7 @@ include("../theme.jl")
 
 DIR = @__DIR__
 
-fig = Figure(
-    resolution=(FULL_WIDTH, FULL_HEIGHT),
-    figure_padding=5,
-)
+fig = Figure(resolution=(FULL_WIDTH, FULL_HEIGHT), figure_padding=5)
 
 axis_kwargs = (
     xgridvisible=false,

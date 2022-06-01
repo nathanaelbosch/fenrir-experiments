@@ -8,7 +8,7 @@ using Random
 
 prob, (tsteps, ode_data), noise_var, θ_init, θ_bounds, u0_bounds = pendulum()
 proj = [0 1]
-ode_data = [proj*u for u in ode_data]
+ode_data = [proj * u for u in ode_data]
 true_sol = solve(prob, Tsit5(), abstol=1e-10, reltol=1e-10);
 D = length(prob.u0)
 RNG = MersenneTwister(1234)
@@ -28,8 +28,14 @@ plot_callback = function ()
         # @info "[$i] [Iteration $j] Callback" u0 p l
         @info "[Iteration $j] Callback" u0 p l
 
-        plt = Plots.scatter(tsteps, ProbNumDiffEq.stack(noisy_ode_data), label="", color=(1:D)',
-                      markersize=2, markerstrokewidth=0.1)
+        plt = Plots.scatter(
+            tsteps,
+            ProbNumDiffEq.stack(noisy_ode_data),
+            label="",
+            color=(1:D)',
+            markersize=2,
+            markerstrokewidth=0.1,
+        )
         Plots.plot!(true_sol, color=:black, linestyle=:dot, label="")
         Plots.plot!(sol, label="", color=[2 1])
         Plots.plot!(ylims=(-2, 2))
@@ -46,7 +52,6 @@ p0 = θ_init()
 p0 = 5.0
 θ_start = [u0..., p0...]
 
-
 function loss(x, _)
     u0, p = x[1:D], x[D+1]
     sol = solve(remake(prob, u0=u0, p=p), Tsit5(), abstol=1e-6, reltol=1e-6, saveat=tsteps)
@@ -61,12 +66,13 @@ l, sol = loss(θ_start, nothing);
 plot_callback()(θ_start, l, sol);
 plot_classic!(ax21, sol, (t=tsteps, u=noisy_ode_data))
 
-
 f = OptimizationFunction(loss, GalacticOptim.AutoForwardDiff())
 optprob = OptimizationProblem(
-    f, θ_start, nothing;
+    f,
+    θ_start,
+    nothing;
     lb=[u0_bounds[1]..., θ_bounds[1]...],
-    ub=[u0_bounds[2]..., θ_bounds[2]...]
+    ub=[u0_bounds[2]..., θ_bounds[2]...],
 )
 
 # optimizer = LBFGS(linesearch=Optim.LineSearches.BackTracking())

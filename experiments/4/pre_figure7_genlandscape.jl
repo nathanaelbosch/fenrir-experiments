@@ -66,7 +66,7 @@ end
 
 using JLD
 save(
-    joinpath(RESULTS_DIR, "loss_heatmap.jld")
+    joinpath(RESULTS_DIR, "loss_heatmap.jld"),
     "losses",
     losses,
     "ps",

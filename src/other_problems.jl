@@ -1,10 +1,10 @@
 function hodgkinhuxley(;
-                       u0=[-70, 0.0, 1.0, 0.1],
-                       tspan=(0.0, 30.0),
-                       p=[70.0, 10.0, 0.05],
-                       tsteps=0:0.2:30,
-                       noise=1e-3,
-                       )
+    u0=[-70, 0.0, 1.0, 0.1],
+    tspan=(0.0, 30.0),
+    p=[70.0, 10.0, 0.05],
+    tsteps=0:0.2:30,
+    noise=1e-3,
+)
     function hh_pospischil(du, u, p, t)
         E = u[1]
         m = u[2]
@@ -48,18 +48,17 @@ function hodgkinhuxley(;
     return prob
 end
 
-
 function sird(;
-              I0=1e-7,
-              u0=[1.0-I0, I0, 0.0, 0.0],
-              tspan=(0.0, 100.0),
-              p=(β = 0.5, γ = 0.06, η = 0.002),
-              )
+    I0=1e-7,
+    u0=[1.0 - I0, I0, 0.0, 0.0],
+    tspan=(0.0, 100.0),
+    p=(β=0.5, γ=0.06, η=0.002),
+)
     function f(du, u, p, t)
         N = 1
         β, γ, η = p
         S, I, R, D = u
-        du[1] = dS = - β * S * I / N
+        du[1] = dS = -β * S * I / N
         du[2] = dI = β * S * I / N - γ * I - η * I
         du[3] = dR = γ * I
         du[4] = dD = η * I
@@ -68,29 +67,28 @@ function sird(;
     return prob
 end
 
-
 """
 Partially motivated from https://www.nature.com/articles/s41598-021-97260-0#Sec2
 E.g. parameter choices for γ and λ are chosen from there
 """
 function seir(;
-              I0=1e-5,
-              E0=4e-5,
-              u0=[1.0-E0-I0, E0, I0, 0.0],
-              tspan=(0.0, 100.0),
-              p=(
-                  β_E = 0.5,
-                  # β_I = 0.01,
-                  γ = 1/5,
-                  λ = 1/21,
-              ),
-              )
+    I0=1e-5,
+    E0=4e-5,
+    u0=[1.0 - E0 - I0, E0, I0, 0.0],
+    tspan=(0.0, 100.0),
+    p=(
+        β_E=0.5,
+        # β_I = 0.01,
+        γ=1 / 5,
+        λ=1 / 21,
+    ),
+)
     function f(du, u, p, t)
         N = 1
         β_E, γ, λ = p
         β_I = 0 # Assumption done in the paper, too
         S, E, I, R = u
-        du[1] = dS = - (β_E * S * E / N + β_I * S * I / N)
+        du[1] = dS = -(β_E * S * E / N + β_I * S * I / N)
         du[2] = dE = β_E * S * E / N + β_I * S * I / N - γ * E
         du[3] = dI = γ * E - λ * I
         du[4] = dR = λ * I
@@ -99,21 +97,14 @@ function seir(;
     return prob
 end
 
-
-function pendulum(
-    ;
-    u0=[0,π/2],
-    tspan = (0.0, 10.0),
-    p=1.0,
-    tsteps=0:0.01:10.0,
-    )
+function pendulum(; u0=[0, π / 2], tspan=(0.0, 10.0), p=1.0, tsteps=0:0.01:10.0)
     g = 9.81
-    function simplependulum(du,u,p,t)
+    function simplependulum(du, u, p, t)
         L = p
         θ = u[1]
         dθ = u[2]
         du[1] = dθ
-        du[2] = -(g/L)*sin(θ)
+        du[2] = -(g / L) * sin(θ)
     end
     prob = ODEProblem(simplependulum, u0, tspan, p)
     # prob = ProbNumDiffEq.remake_prob_with_jac(prob)
@@ -122,15 +113,14 @@ function pendulum(
 
     get_random_parameter() = exp(randn())
     parameter_bounds = (0.0, 100.0)
-    u0_bounds = (zeros(2), 10*ones(2))
+    u0_bounds = (zeros(2), 10 * ones(2))
 
     noise_var = 0.1
 
     return prob, (sol.t, sol.u), noise_var, get_random_parameter, parameter_bounds, u0_bounds
 end
 
-
-function logistic(; tspan=(0.0, 3.0), p=[1.0, 1,0], u0=[0.05])
+function logistic(; tspan=(0.0, 3.0), p=[1.0, 1, 0], u0=[0.05])
     function f(du, u, p, t)
         du[1] = p[1] * u[1] * (1 - u[1] / p[2])
     end

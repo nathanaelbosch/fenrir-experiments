@@ -11,7 +11,7 @@ function exact_nll(
     proj=I,
     order=5,
     tstops=[],
-    )
+)
     N = length(data.u)
     D = length(ode_problem.u0)
     E = length(data.u[1])
@@ -24,8 +24,7 @@ function exact_nll(
         order=order,
         diffusionmodel=FixedMVDiffusion(κ², false),
         smooth=false,
-    )::EK1{0, true, Val{:forward}, FixedMVDiffusion{typeof(κ²)}, TaylorModeInit}
-
+    )::EK1{0,true,Val{:forward},FixedMVDiffusion{typeof(κ²)},TaylorModeInit}
 
     ########################################################################################
     # Part 1: Forward-solve the ODE
@@ -35,7 +34,8 @@ function exact_nll(
         alg,
         dense=false,
         tstops=union(data.t, tstops),
-        adaptive=false, dt=dt,
+        adaptive=false,
+        dt=dt,
         # abstol=1e-9, reltol=1e-9,
         # save_everystep=true, saveat=data.t,
     )
@@ -51,15 +51,13 @@ function exact_nll(
     ########################################################################################
     # Part 2: Backwards-iterate: Compute the NLL and condition on the data
     ########################################################################################
-    NLL, times, states = backwards_iterate!(integ, sol, observation_noise_var, data; proj=proj)
+    NLL, times, states =
+        backwards_iterate!(integ, sol, observation_noise_var, data; proj=proj)
     # Finally, project the state estimates to the zeroth derivative for plotting purposes
     u_probs = project_to_solution_space!(integ.sol.pu, states, integ.cache.SolProj)
     return NLL, times, u_probs
-
 end
-function backwards_iterate!(integ, sol,
-                           observation_noise_var,
-                           data; proj=I)
+function backwards_iterate!(integ, sol, observation_noise_var, data; proj=I)
     N = length(data.u)
     D = length(integ.u)
     E = length(data.u[1])
@@ -110,7 +108,7 @@ function get_lowerdim_measurement_cache(m_tmp, E)
     _z, _S = m_tmp
     return Gaussian(
         view(_z, 1:E),
-        SRMatrix(view(_S.squareroot, 1:E, :), view(_S.mat, 1:E, 1:E))
+        SRMatrix(view(_S.squareroot, 1:E, :), view(_S.mat, 1:E, 1:E)),
     )
 end
 
@@ -136,7 +134,6 @@ function project_to_solution_space!(u_probs, states, projmat)
     return u_probs
 end
 
-
 function get_initial_diff(prob, noisy_ode_data, tsteps, proj=I)
     N = length(tsteps)
     E = length(noisy_ode_data[1])
@@ -157,8 +154,8 @@ function get_initial_diff(prob, noisy_ode_data, tsteps, proj=I)
     x.μ .= 0
     D, _ = size(x.Σ)
     σ = 1e2
-    x.Σ.squareroot .= σ*I(D)
-    x.Σ.mat .= σ^2*I(D)
+    x.Σ.squareroot .= σ * I(D)
+    x.Σ.mat .= σ^2 * I(D)
 
     t0 = prob.tspan[1]
     asdf = zero(eltype(x.μ))
