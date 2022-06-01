@@ -73,7 +73,7 @@ function backwards_iterate!(integ, sol,
     x_tmp3 = integ.cache.x
     m_tmp = get_lowerdim_measurement_cache(m_tmp, E)
 
-    x_pred = sol.x_pred # This contains the predicted states of the forward pass
+    # x_pred = sol.x_pred # This contains the predicted states of the forward pass
     x_smooth = sol.x_filt # These will be smoothed in the following
     diffusion = sol.diffusions[1] # diffusions are all the same anyways
 
@@ -93,8 +93,8 @@ function backwards_iterate!(integ, sol,
 
         xf = mul!(x_tmp, P, x_smooth[i])
         xs = mul!(x_tmp2, P, x_smooth[i+1])
-        xp = mul!(x_tmp3, P, x_pred[i+1])
-        ProbNumDiffEq.smooth!(xf, xs, xp, A, Q, integ, diffusion)
+        # xp = mul!(x_tmp3, P, x_pred[i+1])
+        ProbNumDiffEq.smooth!(xf, xs, A, Q, integ, diffusion)
         xs = mul!(x_smooth[i], PI, xf)
 
         if sol.t[i] in data.t
