@@ -4,7 +4,6 @@ include("../theme.jl")
 DIR = @__DIR__
 
 df_rk = CSV.read("experiments/4/results/rk_df.csv", DataFrame)
-# df_rk = df_rk[.!isnan.(df_rk.popt), :]
 df_fenrir = CSV.read("experiments/4/results/fenrir_df.csv", DataFrame)
 
 fig = Figure(resolution=(HALF_WIDTH, HALF_HEIGHT), figure_padding=5)
@@ -13,7 +12,6 @@ ax =
     fig[1, 1] = Axis(
         fig;
         yscale=log10,
-        # yticks=([1e-1, 1e0, 1e1, 1e2], ["10⁻¹", "10⁰", "10¹", "10²"]),
         xlabel="Initial parameter",
         ylabel="Inferred parameter",
         axis_kwargs...,
@@ -37,10 +35,6 @@ sc2 = scatter!(
     marker=:diamond,
 )
 hl = hlines!(ax, [1], color=:black, linestyle=:dash, linewidth=1)
-
-# ONES = ones(Int, length(df_fenrir.p0))
-# sc1 = barplot!(ax, ONES, ONES, stack=ONES, color=df_fenrir.popt, colormap=:amp, direction=:x)
-# sc2 = barplot!(ax, 2ONES, ONES, stack=ONES, color=df_rk.popt, colormap=:amp, direction=:x)
 
 axislegend(ax, [sc2, sc1], ["RK", "FENRIR"], nothing, position=:lt)
 
