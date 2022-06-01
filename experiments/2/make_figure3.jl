@@ -61,4 +61,4 @@ ax.xticks = ([1, 2, 3, 4], labels)
 ylims!(ax, -100, 250)
 ax.yticks = [-100, 0, 100, 200]
 trim!(fig.layout)
-save(joinpath(DIR, "model_selection.pdf"), fig, pt_per_unit=1)
+save(joinpath(DIR, "figure3.pdf"), fig, pt_per_unit=1)
