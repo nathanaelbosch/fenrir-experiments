@@ -1,28 +1,26 @@
 #=
 I think this script was meant to showcase that RK fails for high-frequency data
 =#
-using ProbNumDiffEq, OrdinaryDiffEq, GalacticOptim, Optim, Plots, LinearAlgebra, Statistics, Flux
+using LinearAlgebra, Statistics, Random
+using ProbNumDiffEq, OrdinaryDiffEq, GalacticOptim, Optim, Flux, UnPack, DataFrames
 using Fenrir
-using UnPack
-using Random
-using DataFrames
 
 prob, (tsteps, ode_data), noise_var, θ_init, θ_bounds, u0_bounds = pendulum()
 proj = [0 1]
-ode_data = [proj*u for u in ode_data]
+ode_data = [proj * u for u in ode_data]
 true_sol = solve(prob, Tsit5(), abstol=1e-10, reltol=1e-10);
 D = length(prob.u0)
 RNG = MersenneTwister(1234)
 noisy_ode_data = [u + sqrt.(noise_var) .* randn(RNG, size(u)) for u in ode_data];
 
-Plots.plot(true_sol, color=:black, linestyle=:dash, label="")
-Plots.scatter!(tsteps, ProbNumDiffEq.stack(noisy_ode_data), color=(1:D)', label="")
+# Plots.plot(true_sol, color=:black, linestyle=:dash, label="")
+# Plots.scatter!(tsteps, ProbNumDiffEq.stack(noisy_ode_data), color=(1:D)', label="")
 
 callback = function ()
     j = 0
     function (x, l, args...)
         j += 1
-        @info "[Iteration $j] Callback" l p=x[1] σ²=exp(x[end-1]) κ²=exp(x[end])
+        @info "[Iteration $j] Callback" l p = x[1] σ² = exp(x[end-1]) κ² = exp(x[end])
         return false
     end
 end
@@ -56,9 +54,11 @@ function get_opt(p0)
     optimizer = LBFGS()
     diff_f = OptimizationFunction(diff_loss, GalacticOptim.AutoForwardDiff())
     diff_optprob = OptimizationProblem(
-        diff_f, [log(σ²0), log(κ²0)], opt_params;
+        diff_f,
+        [log(σ²0), log(κ²0)],
+        opt_params;
         lb=[log(1e-8), log(1e-20)],
-        ub=[log(1e4), log(1e50)]
+        ub=[log(1e4), log(1e50)],
     )
     optsol = solve(diff_optprob, optimizer; maxiters=200, cb=callback())
 
@@ -69,7 +69,7 @@ function get_opt(p0)
         [p0, optsol.u...],
         opt_params;
         lb=[0.0, log(1e-8), log(1e-20)],
-        ub=[100.0, log(1e4), log(1e50)]
+        ub=[100.0, log(1e4), log(1e50)],
     )
     # optimizer = LBFGS()
     optimizer = LBFGS(linesearch=Optim.LineSearches.BackTracking())
