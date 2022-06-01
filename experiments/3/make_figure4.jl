@@ -6,9 +6,6 @@ using CairoMakie
 using ColorSchemes
 
 DIR = @__DIR__
-# RESULTS_DIR = joinpath(@__DIR__, "results")
-# filename = "seir_fenrir.txt"
-# filepath = joinpath(RESULTS_DIR, filename)
 
 prob = Fenrir.seir()
 prob = ProbNumDiffEq.remake_prob_with_jac(prob)
@@ -46,7 +43,6 @@ e0 = 0.001
 i0 = 0.0001
 p0 = [rand(), rand(), rand()]
 p0 = [0.9, 0.1, 0.5]
-# @info "initial parameters" e0 i0 p0
 x0 = [e0, i0, p0..., log(1.0), log(κ²0)]
 
 opt_params = (prob=prob, ode_data=noisy_ode_data, tsteps=tsteps, dt=0.2, proj=proj);
@@ -61,8 +57,6 @@ optprob = OptimizationProblem(
     ub=[1.0, 1.0, 1.0, 1.0, 1.0, log(1e2), log(1e20)],
 )
 
-# optimizer = BFGS(initial_stepnorm=0.01);
-# optimizer = LBFGS()
 optimizer = LBFGS(linesearch=Optim.LineSearches.BackTracking())
 _cb() = (
     j = 1;
@@ -75,19 +69,9 @@ _cb() = (
 )
 optsol = solve(optprob, optimizer; maxiters=1000, cb=_cb())
 
-# opt_x = [
-#    3.808457393160264e-5
-#    1.0184768589580197e-5
-#    0.49987417614106333
-#    0.19994776944802228
-#    0.04761834824679774
-#  -18.51413937751103
-# -8.119395703603821
-# ]
 include("../theme.jl")
 
 COLORS = ColorSchemes.tab10.colors
-# COLORS = ColorSchemes.seaborn_deep.colors
 fig = Figure(resolution=(HALF_WIDTH, HALF_HEIGHT), figure_padding=5)
 ax1 =
     fig[1, 1] = Axis(
@@ -124,7 +108,6 @@ for (x, l, j) in [(x0, "initial", 1), (optsol.u, "final", 2)]
             fig[j, 1],
             tsteps,
             [u[i] for u in noisy_ode_data],
-            # color=:black,
             color=COLORS[[3, 4][i]],
             markersize=2,
         )
@@ -137,7 +120,6 @@ Legend(
     elements,
     labels,
     "",
-    # orientation = :horizontal,
     margin=(0, 0, 0, 0),
     padding=(0, 0, 0, 0),
     position=:rt,

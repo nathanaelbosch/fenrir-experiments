@@ -9,7 +9,6 @@ DIR = @__DIR__
 WIDTH, HEIGHT = FULL_WIDTH, HALF_HEIGHT * 0.9
 
 RESULTS_DIR = joinpath(@__DIR__, "results")
-RESULTS_DIR = "experiments/1/results"
 
 PROBLEMS = Dict("lv" => lotkavolterra, "fhn" => fitzhughnagumo)
 NOISE_LEVELS = ("low", "high")
@@ -21,7 +20,12 @@ LABELS = Dict(
 
 RELATIVE_ERROR = false
 
-subplot = 'a'
+_subplotchar = Dict(
+    ("lv", "low") => 'a',
+    ("lv", "high") => 'b',
+    ("fhn", "low") => 'c',
+    ("fhn", "high") => 'd',
+)
 for probname in keys(PROBLEMS), noisestr in NOISE_LEVELS
     @info "Plotting" probname noisestr
     problem = PROBLEMS[probname]
@@ -93,6 +97,6 @@ for probname in keys(PROBLEMS), noisestr in NOISE_LEVELS
     trim!(fig.layout)
 
     # save(joinpath(DIR, "results", "p_errs_$(probname)_$(noisestr).pdf"), fig, pt_per_unit=1)
-    save(joinpath(DIR, "figure9$(subplot).pdf"), fig, pt_per_unit=1)
-    subplot += 1
+    char = _subplotchar[(probname, noisestr)]
+    save(joinpath(DIR, "figure9$(char).pdf"), fig, pt_per_unit=1)
 end

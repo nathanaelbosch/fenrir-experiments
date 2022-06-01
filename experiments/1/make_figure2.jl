@@ -8,7 +8,6 @@ DIR = @__DIR__
 WIDTH, HEIGHT = FULL_WIDTH, HALF_HEIGHT
 
 RESULTS_DIR = joinpath(@__DIR__, "results")
-RESULTS_DIR = "experiments/1/results"
 
 PROBLEMS = ((lotkavolterra, "lv"), (fitzhughnagumo, "fhn"))
 
@@ -125,6 +124,5 @@ trim!(fig.layout)
 
 colsize!(fig.layout, 1, Auto(0.4))
 colgap!(fig.layout, 10)
-# save(joinpath(DIR, "results", "trmses.pdf"), fig, pt_per_unit=1)
 include(joinpath(DIR, "_trajectory_plot.jl"))
 save(joinpath(DIR, "results", "figure2.pdf"), fig, pt_per_unit=1)
