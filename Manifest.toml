@@ -1842,8 +1842,10 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [[deps.ProbNumDiffEq]]
 deps = ["DiffEqBase", "DiffEqDevTools", "ForwardDiff", "GaussianDistributions", "LinearAlgebra", "ModelingToolkit", "Octavian", "OrdinaryDiffEq", "RecipesBase", "RecursiveArrayTools", "Reexport", "StaticArrays", "Statistics", "StructArrays", "TaylorIntegration", "TaylorSeries", "Tullio", "UnPack"]
-git-tree-sha1 = "aceb0a008b80001e3ed0df592bf2ef04b13b787f"
+git-tree-sha1 = "1196909034403a1f1cb36357cfcf50881fa7a8fd"
 pinned = true
+repo-rev = "fenrir-experiments"
+repo-url = "https://github.com/nathanaelbosch/ProbNumDiffEq.jl.git"
 uuid = "bf3e78b0-7d74-48a5-b855-9609533b56a5"
 version = "0.5.4"
 
