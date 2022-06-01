@@ -21,6 +21,7 @@ LABELS = Dict(
 
 RELATIVE_ERROR = false
 
+subplot = 'a'
 for probname in keys(PROBLEMS), noisestr in NOISE_LEVELS
     @info "Plotting" probname noisestr
     problem = PROBLEMS[probname]
@@ -91,5 +92,7 @@ for probname in keys(PROBLEMS), noisestr in NOISE_LEVELS
 
     trim!(fig.layout)
 
-    save(joinpath(DIR, "results", "p_errs_$(probname)_$(noisestr).pdf"), fig, pt_per_unit=1)
+    # save(joinpath(DIR, "results", "p_errs_$(probname)_$(noisestr).pdf"), fig, pt_per_unit=1)
+    save(joinpath(DIR, "figure9$(subplot).pdf"), fig, pt_per_unit=1)
+    subplot += 1
 end

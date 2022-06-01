@@ -11,6 +11,6 @@ If you encounter issues, make sure that you install ODIN with Tensorflow 1.14.
 The other scripts that need to be run are:
 - `./run_rk.jl` to compute the RK results
 - `./run_fenrir.jl` to compute the Fenrir results
-- `./2_boxplot_makie.jl` to compute the final plot (calls `./2_trajectory_plot.jl`)
+- `./make_figure2.jl` to compute the final plot (calls `./_trajectory_plot.jl`)
 
-`./9_parameter_boxplots.jl` creates Figure 9 that can be found in the appendix.
+`./make_figure9.jl` creates Figure 9 that can be found in the appendix.
