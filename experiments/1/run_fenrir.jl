@@ -85,7 +85,7 @@ for probname in ("lv", "fhn"), noisestr in ("low", "high")
                 @unpack prob, ode_data, tsteps, dt, tstops = other_params
                 data = (t=tsteps, u=noisy_ode_data)
                 _prob = remake(prob, u0=u0, p=p)
-                return exact_nll(data, σ², κ²; dt=dt, tstops=tstops)
+                return exact_nll(_prob, data, σ², κ²; dt=dt, tstops=tstops)
             end
             function _cb1()
                 j = 0
