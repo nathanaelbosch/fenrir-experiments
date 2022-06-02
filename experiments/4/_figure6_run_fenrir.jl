@@ -12,8 +12,8 @@ D = length(prob.u0)
 RNG = MersenneTwister(1234)
 noisy_ode_data = [u + sqrt.(noise_var) .* randn(RNG, size(u)) for u in ode_data];
 
-Plots.plot(true_sol, color=:black, linestyle=:dash, label="")
-Plots.scatter!(tsteps, ProbNumDiffEq.stack(noisy_ode_data), color=(1:D)', label="")
+# Plots.plot(true_sol, color=:black, linestyle=:dash, label="")
+# Plots.scatter!(tsteps, ProbNumDiffEq.stack(noisy_ode_data), color=(1:D)', label="")
 
 # trajectory = []
 plot_callback = function ()
@@ -62,9 +62,7 @@ plot_callback = function ()
 end
 
 κ²0 = get_initial_diff(prob, noisy_ode_data, tsteps, proj)
-κ²0 = 1e30
 u0 = [0.0, noisy_ode_data[1][1]]
-# u0 = [0.0, 0.0]
 u0 = clamp.(u0, u0_bounds[1], u0_bounds[2])
 σ²0 = 1.0
 p0 = θ_init()
@@ -76,9 +74,7 @@ opt_params = (
     prob=prob,
     ode_data=noisy_ode_data,
     tsteps=tsteps,
-    # dt=1e-1,
-    dt=1e-3,
-    # dt=false,
+    dt=false,
     proj=proj,
 );
 
@@ -90,7 +86,7 @@ function loss(x, other_params)
     return exact_nll(remake(prob, u0=u0, p=p), data, σ², κ²; dt=dt, proj=proj)
 end
 l, times, states = loss(x0, opt_params);
-plot_callback()(x0, l, times, states)
+# plot_callback()(x0, l, times, states)
 plot_fenrir!(ax11, (t=times, u=states), (t=tsteps, u=noisy_ode_data))
 
 ############################################################################################
