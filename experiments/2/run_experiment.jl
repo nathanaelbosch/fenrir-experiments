@@ -1,6 +1,6 @@
-using ProbNumDiffEq, OrdinaryDiffEq, GalacticOptim, Optim, Plots, LinearAlgebra, Statistics
+using LinearAlgebra, Statistics, Random
+using ProbNumDiffEq, OrdinaryDiffEq, GalacticOptim, Optim, UnPack
 using Fenrir
-using Random
 
 ALG = EK1
 DT = 1e-2
@@ -73,7 +73,11 @@ for (i, _prob) in enumerate((prob1, prob2, prob3, prob4))
             @unpack u0, p, σ², κ² = vec2args(x)
             @unpack prob, ode_data, tsteps, dt = other_params
             data = (t=tsteps, u=noisy_ode_data)
-            return exact_nll(remake(prob, u0=u0, p=p), data, σ², κ²; dt=dt)
+            try
+                return exact_nll(remake(prob, u0=u0, p=p), data, σ², κ²; dt=dt)
+            catch PosDefException
+                return 1e100, nothing, nothing
+            end
         end
         l, times, states = loss(θ_start, opt_params)
 
@@ -90,7 +94,6 @@ for (i, _prob) in enumerate((prob1, prob2, prob3, prob4))
         optimizer = LBFGS(linesearch=Optim.LineSearches.BackTracking())
         # optimizer = LBFGS()
         optsol = solve(optprob, optimizer; maxiters=200)
-        # optsol = solve(optprob, optimizer; maxiters=200, show_trace=true)
         opt_u0, opt_p, opt_σ², opt_κ² =
             optsol.u[1:D], optsol.u[D+1:end-2], exp(optsol.u[end-1]), exp(optsol.u[end])
         @info "[Problem $i][$j] Done" prob.p opt_p opt_u0 opt_σ² opt_κ²

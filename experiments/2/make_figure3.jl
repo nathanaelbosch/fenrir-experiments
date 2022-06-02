@@ -41,12 +41,12 @@ for i in 1:4
     @info "" i mvalstr medvalstr
 
     xs = repeat([i], length(vals[i]))
-    boxplot!(ax, xs, vals[i]; color=COLORS[i], BOXPLOT_KWARGS...)
+    CairoMakie.boxplot!(ax, xs, vals[i]; color=COLORS[i], BOXPLOT_KWARGS...)
 end
 
 labels = ["M₁₁", "M₁₀", "M₀₁", "M₀₀"]
 ax.xticks = ([1, 2, 3, 4], labels)
-ylims!(ax, -100, 250)
+CairoMakie.ylims!(ax, -100, 250)
 ax.yticks = [-100, 0, 100, 200]
 trim!(fig.layout)
 save(joinpath(DIR, "figure3.pdf"), fig, pt_per_unit=1)
