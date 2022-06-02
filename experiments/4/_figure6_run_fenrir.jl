@@ -82,23 +82,16 @@ opt_params = (
     proj=proj,
 );
 
+vec2args(x) = (u0=x[1:D], p=x[D+1], σ²=exp.(x[end-1]), κ²=exp.(x[end]))
 function loss(x, other_params)
-    u0, p, σ²_log, κ²_log = x[1:D], x[D+1], x[D+2], x[D+3]
+    @unpack u0, p, σ², κ² = vec2args(x)
     @unpack prob, ode_data, tsteps, dt = other_params
-    data = (t=tsteps, u=noisy_ode_data)
-    return exact_nll(
-        remake(prob, u0=u0, p=p),
-        data,
-        exp(σ²_log),
-        # noise_var,
-        exp(κ²_log);
-        dt=dt,
-        proj=proj,
-    )
+    data = (t=tsteps, u=ode_data)
+    return exact_nll(remake(prob, u0=u0, p=p), data, σ², κ²; dt=dt, proj=proj)
 end
 l, times, states = loss(x0, opt_params);
 plot_callback()(x0, l, times, states)
-# plot_fenrir!(ax11, (t=times, u=states), (t=tsteps, u=noisy_ode_data))
+plot_fenrir!(ax11, (t=times, u=states), (t=tsteps, u=noisy_ode_data))
 
 ############################################################################################
 # First optimize only the diffusion!
@@ -114,7 +107,6 @@ optprob = OptimizationProblem(
 )
 _cb = (x, l, args...) -> begin
     @info "Diffusion Opt CB" σ² = exp(x[1]) κ² = exp(x[2]) loss = l
-    # push!(trajectory, (p=p0, diffusion=exp(x[1])))
     return false
 end
 optsol = solve(optprob, LBFGS(); maxiters=100, cb=_cb)
@@ -124,6 +116,9 @@ x0 = [x0[1:end-2]..., optsol.u...]
 l, times, states = loss(x0, opt_params);
 plot_fenrir!(ax12, (t=times, u=states), (t=tsteps, u=noisy_ode_data))
 
+############################################################################################
+# Now optimize the full model
+############################################################################################
 f = OptimizationFunction(loss, GalacticOptim.AutoForwardDiff())
 optprob = OptimizationProblem(
     f,
@@ -132,16 +127,17 @@ optprob = OptimizationProblem(
     lb=[-100.0, -100.0, 0.0, log(1e-8), log(1e-20)],
     ub=[100.0, 100.0, 100.0, log(1e4), log(1e50)],
 )
-# optimizer = LBFGS()
 optsol = solve(
     optprob,
     # LBFGS(linesearch=Optim.LineSearches.BackTracking());
     LBFGS();
     maxiters=100,
-    # cb=plot_callback()
+    cb=(x, l, args...) -> begin
+        @info "" l vec2args(x)
+        return false
+    end,
 )
 @info "DONE"
 
 l, times, states = loss(optsol.u, opt_params);
 plot_fenrir!(ax13, (t=times, u=states), (t=tsteps, u=noisy_ode_data))
-# push!(trajectories, (p0=p0, trajectory=copy(trajectory)))

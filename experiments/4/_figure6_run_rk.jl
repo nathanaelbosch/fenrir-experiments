@@ -14,8 +14,8 @@ D = length(prob.u0)
 RNG = MersenneTwister(1234)
 noisy_ode_data = [u + sqrt.(noise_var) .* randn(RNG, size(u)) for u in ode_data];
 
-Plots.plot(true_sol, color=:black, linestyle=:dash, label="")
-Plots.scatter!(tsteps, ProbNumDiffEq.stack(noisy_ode_data), color=(1:D)', label="")
+# Plots.plot(true_sol, color=:black, linestyle=:dash, label="")
+# Plots.scatter!(tsteps, ProbNumDiffEq.stack(noisy_ode_data), color=(1:D)', label="")
 
 plot_callback = function ()
     j = 0
@@ -63,7 +63,7 @@ function loss(x, _)
     return mean(norm.([proj * u for u in sol.u] - noisy_ode_data)), sol
 end
 l, sol = loss(θ_start, nothing);
-plot_callback()(θ_start, l, sol);
+# plot_callback()(θ_start, l, sol);
 plot_classic!(ax21, sol, (t=tsteps, u=noisy_ode_data))
 
 f = OptimizationFunction(loss, GalacticOptim.AutoForwardDiff())
@@ -78,6 +78,8 @@ optprob = OptimizationProblem(
 # optimizer = LBFGS(linesearch=Optim.LineSearches.BackTracking())
 optimizer = LBFGS()
 
-optsol = solve(optprob, optimizer; maxiters=100, cb=plot_callback())
+optsol = solve(optprob, optimizer; maxiters=100,
+               # cb=plot_callback()
+               )
 _l, final_sol = loss(optsol.u, nothing)
 plot_classic!(ax23, final_sol, (t=tsteps, u=noisy_ode_data))
