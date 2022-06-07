@@ -39,12 +39,15 @@ function exact_nll(
         # abstol=1e-9, reltol=1e-9,
         # save_everystep=true, saveat=data.t,
     )
+
+    curr_level = Logging.min_enabled_level(Logging.current_logger())
+    Logging.disable_logging(Logging.Warn)
     sol = solve!(integ)
+    Logging.disable_logging(curr_level - 1)
 
     if sol.retcode != :Success
-        # What should be done if the solver does not succeed? Raise error? Return large NLL?
-        @error "The PN ODE solver did not succeed!"
-        # error()
+        # In case the solver does not succeed, return a large NLL. This helps optimization.
+        @debug "The solver did not succeed. Therefore, return a large NLL."
         return 1e10, sol.t, sol.pu
     end
 

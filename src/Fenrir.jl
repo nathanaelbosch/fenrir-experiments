@@ -2,6 +2,7 @@ module Fenrir
 
 using LinearAlgebra
 using Statistics
+using Logging
 using Distributions: logpdf
 using ProbNumDiffEq
 using ProbNumDiffEq: X_A_Xt
