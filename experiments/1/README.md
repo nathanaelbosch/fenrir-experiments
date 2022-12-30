@@ -1,4 +1,4 @@
-# Experiment 1: Benchmarking Estimation Accracy
+# Experiment 1: Benchmarking Estimation Accuracy
 
 We compare Fenrir to ODIN and to a Runge-Kutta based inference method, on the Lotka-Volterra and FitzHugh-Nagumo problem; each with 2 noise levels.
 
